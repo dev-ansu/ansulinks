@@ -46,7 +46,7 @@ const Admin = ()=>{
                     onInput={(e:ChangeEvent<HTMLInputElement>) => setNameInput(e.target.value)}
                 />
 
-                <label className="text-white font-medium mt-2 mb2 " htmlFor="">Nome do link:</label>
+                <label className="text-white font-medium mt-2 mb2 " htmlFor="">URL do link:</label>
                 <Input
                     placeholder="Digite a URL do link"
                     register={register('url_link')}
