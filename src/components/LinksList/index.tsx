@@ -28,7 +28,7 @@ const LinksList = ()=>{
             setLinks(lista);
         })
         return () =>{ unSub() } 
-    })
+    },[])
 
     const handleDeleteLink = async(id: string)=>{
         const confirm = window.confirm("Deseja realmente excluir o link?")
