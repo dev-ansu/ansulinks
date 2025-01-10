@@ -8,7 +8,8 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../../services/firebaseConnection";
 import { toast } from "react-toastify";
 import { updateProfile, User } from "firebase/auth";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { FaCopy, FaRegCopy } from "react-icons/fa";
 
 interface UserType{
     createdAt: Date;
@@ -21,7 +22,7 @@ const Profile = ()=>{
 
     const {user, handleInfoUser} = useAuthContext();
     const [userFound, setUserFound] = useState<UserType>();
-
+    const [hasCopy, setHasCopy] = useState(false);
     const {handleSubmit, register, formState:{errors}, reset} = useForm<UpdateProfile>({
         mode:"all",
         criteriaMode:"all",
@@ -78,13 +79,33 @@ const Profile = ()=>{
         }
     }
 
+    const copyToClipboard = (toCopy: string)=>{
+        navigator.clipboard.writeText(toCopy).then(()=>{
+            toast.success('URL copiada com sucesso.')
+            setHasCopy(true);
+        }).catch((err)=>{
+            toast.error('A URL não foi copiada.')
+            setHasCopy(false);
+            console.log(err);
+        })
+    }
+
     return(
         <>
         <div style={{background: userFound?.background}} className={`flex  items-center flex-col min-h-screen pb-7 px-2`}>
         <Header />
-            <h1 className="text-white text-2xl font-medium mt-8 mb-4">Minhas redes sociais </h1>
+            <h1 className="text-white text-2xl font-medium mt-8 mb-4">Meu perfil</h1>
+            
 
             <form onSubmit={handleSubmit(save)} className="flex flex-col max-w-xl w-full">
+            <p className="border-0 h-9 rounded-md outline-none px-2 mb-3 bg-white flex justify-between items-center w-full">
+            {!hasCopy && <FaRegCopy onClick={() => copyToClipboard(`${import.meta.env.VITE_APPURL}/${user?.uid}`)} className="items-start cursor-pointer text-black" />}
+            {hasCopy && <FaCopy onClick={() => copyToClipboard(`${import.meta.env.VITE_APPURL}/${user?.uid}`)} className="items-start cursor-pointer text-black" />}
+            <span className="w-full text-center">
+            {import.meta.env.VITE_APPURL}/{user?.uid}
+            </span>
+            </p>
+
                 <label className="text-white font-medium mb-2 mt-2" htmlFor="">Texto do cabeçalho:</label>
                     <Input 
                         type="text"
