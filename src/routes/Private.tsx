@@ -1,50 +1,23 @@
-import { ReactNode, useState, useEffect } from "react";
-import {auth} from "../services/firebaseConnection";
-import { onAuthStateChanged } from "firebase/auth"
-import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "../contexts/AuthContext";
+import { Navigate, Outlet } from "react-router-dom";
 
-interface PrivateProps{
-    children: ReactNode,
-}
 
-const Private = ({children}:PrivateProps):any=>{
-    const [loading, setLoading] = useState(true);
-    const [signed, setSigned] = useState(false);
-    const navigate = useNavigate();
-
-    useEffect(()=>{
-        
-        const unSub = onAuthStateChanged(auth, (user)=>{
-            if(user){
-                const userData = {
-                    uuid: user.uid,
-                    email: user.email
-                }
-                localStorage.setItem("@aurolinks", JSON.stringify(userData));
-                setLoading(false);
-                setSigned(true);
-            }else{
-                setLoading(false);
-                setSigned(false);
-            }
-        })
-        
-        return ()=>{
-            unSub();
-        }
-
-    },[])
-
-    if(loading){
-        return <></>
+const Private = ()=>{
+    const {loadingAuth, signed} = useAuthContext();
+    
+    if(loadingAuth){
+        return (
+            <div className="min-h-96 flex justify-center items-center">
+                <h1 className="text-7xl md:text-3xl lg:text-5xl font-bold text-center">Carregando...</h1>
+            </div>
+        )
     }
 
     if(!signed){
-        return navigate("/login")
+        return <Navigate to="/login" replace={true} />
     }
-
-    return children
+    
+    return <Outlet />;
 }
-
 
 export default Private;

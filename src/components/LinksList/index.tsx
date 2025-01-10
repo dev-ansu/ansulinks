@@ -1,19 +1,21 @@
 import {FiTrash} from "react-icons/fi"
 import { useEffect, useState } from "react";
-import {onSnapshot, doc, collection,deleteDoc, query, orderBy} from "firebase/firestore"
+import {onSnapshot, doc, collection,deleteDoc, query, orderBy, where} from "firebase/firestore"
 import {db} from "../../services/firebaseConnection";
 import { CriarLinkSchema } from "../../pages/admin";
 import { toast } from "react-toastify";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 interface LinkProps extends CriarLinkSchema{
     id: string;
 };
 const LinksList = ()=>{
     const [links, setLinks] = useState<LinkProps[]>();
-
+    const {user} = useAuthContext();
     useEffect(()=>{
         const linksRef = collection(db, "links");
-        const queryRef = query(linksRef, orderBy("createdAt", "asc"));
+        const queryRef = query(linksRef, where('uid','==', user?.uid));
+
         const unSub = onSnapshot(queryRef, (snapshot)=>{
             let lista: LinkProps[] = [];
             snapshot.forEach((doc)=>{
@@ -29,7 +31,7 @@ const LinksList = ()=>{
         })
         return () =>{ unSub() } 
     },[])
-
+    console.log(links)
     const handleDeleteLink = async(id: string)=>{
         const confirm = window.confirm("Deseja realmente excluir o link?")
         if(confirm){

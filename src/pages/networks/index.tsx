@@ -4,14 +4,15 @@ import Input from "../../components/Input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {db} from "../../services/firebaseConnection";
-import { doc, getDoc, setDoc} from "firebase/firestore"
+import { getDoc, setDoc, doc} from "firebase/firestore"
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 const criarRedesSociaisSchema = z.object({
-    facebook: z.string().min(1, 'Este campo é obrigatório.').url('Digite um link válido.'),
-    instagram: z.string().min(1, 'Este campo é obrigatório.').url("Digite um link válido."),
-    youtube: z.string().url("Digite um link válido.").optional()
+    facebook: z.string().url('Digite um link válido').optional(),
+    instagram: z.string().url("Digite um link válido.").optional(),
+    youtube: z.string().optional().or(z.string().url('Digite um url válido.')),
 })
 
 type CriarRedesSociasProps = z.infer<typeof criarRedesSociaisSchema>;
@@ -20,8 +21,9 @@ export interface RedesSociaisProps extends CriarRedesSociasProps{
 }
 
 const Networks = ()=>{
+    const {user} = useAuthContext();
     const [redesSocias, setRedesSociais] = useState<CriarRedesSociasProps>();
-    const {handleSubmit, register, formState:{errors}, reset} = useForm<CriarRedesSociasProps>({
+    const {handleSubmit, register, formState:{errors}} = useForm<CriarRedesSociasProps>({
         mode:"all",
         criteriaMode:"all",
         resolver: zodResolver(criarRedesSociaisSchema),
@@ -29,9 +31,10 @@ const Networks = ()=>{
 
     const save = async(data: CriarRedesSociasProps)=>{
         try{
-            await setDoc(doc(db, 'networks', 'link'), {...data, createdAt: new Date()})
-            toast.success('Redes sociais cadastradas com sucesso!')
-            reset();
+            if(user?.uid){
+                await setDoc(doc(db, 'networks', user?.uid), {...data, createdAt: new Date()})
+                toast.success('Redes sociais cadastradas com sucesso!')
+            }
         }catch(err){
             toast.error("Houve um erro ao cadastrar.")
         }
@@ -39,14 +42,16 @@ const Networks = ()=>{
 
     useEffect(()=>{
         const loadLinks = async ()=>{
-            const docRef = doc(db, 'networks', 'link');
+    
             try{
-                const snapshot = await getDoc(docRef);
-                setRedesSociais({
-                    facebook: snapshot.data()?.facebook,
-                    instagram: snapshot.data()?.instagram,
-                    youtube: snapshot.data()?.youtube,
-                })
+                if(user?.uid){
+                    const snapshot = await getDoc(doc(db, 'networks', user?.uid));
+                    setRedesSociais({
+                        facebook: snapshot.data()?.facebook,
+                        instagram: snapshot.data()?.instagram,
+                        youtube: snapshot.data()?.youtube,
+                    })
+                }
             }catch(err){
                 console.log(err);
             }
@@ -80,7 +85,7 @@ const Networks = ()=>{
 
                 <label className="text-white font-medium mb-2 mt-2" htmlFor="">Link do YouTube:</label>
                     <Input 
-                        type="url"
+                        type="text"
                         placeholder="Digite a URL"
                         register={register("youtube")}
                         error={errors.youtube?.message}

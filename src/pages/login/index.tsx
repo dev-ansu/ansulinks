@@ -22,7 +22,7 @@ const Login = ()=>{
             try{
                 await signInWithEmailAndPassword(auth, data.email, data.password)
                 toast.success("Usuário logado com sucesso.");
-                navigate("/admin", {replace: true});
+                navigate("/app", {replace: true});
             }catch(err){
                 toast.error("Credenciais inválidas. Tente novamente!");
                 reset();
@@ -61,6 +61,9 @@ const Login = ()=>{
                     type="submit"
                     className="h-9 font-medium text-white bg-blue-600 rounded border-0 text-lg"
                 >Acessar</button>
+                <Link to="/register" className="text-blue-400">Não tem login? Cadastre-se.</Link>
+
+
             </form>
         </div>
     )

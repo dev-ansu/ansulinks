@@ -1,19 +1,55 @@
 import Social from "../../components/Social";
 import {FaFacebook, FaInstagram, FaYoutube} from "react-icons/fa"
 import {db} from "../../services/firebaseConnection"
-import {getDocs, collection, orderBy, query, doc, getDoc} from "firebase/firestore"
+import {getDocs, collection, query, doc, getDoc, where} from "firebase/firestore"
 import { useEffect, useState } from "react";
 import { CriarLinkSchema } from "../admin";
 import { RedesSociaisProps } from "../networks";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+
+interface UserFound{
+    createdAt: Date;
+    username: string;
+    name: string;
+    background: string;
+} 
 
 const Home = ()=>{
     const [links, setLinks] = useState<CriarLinkSchema[]>();
     const [socialLinks, setSocialLinks] = useState<RedesSociaisProps>();
+    const { uid } = useParams();
+    const [userFound, setUserFound] = useState({} as UserFound);
+    const navigate = useNavigate();
+    if(!uid){
+        return <Navigate to="/notfound" replace={true} />
+    }
 
     useEffect(()=>{
+        const userFound = async()=>{
+            
+            try{
+                const docRef = await getDoc(doc(db, 'usuarios', uid));
+                const data = docRef.data() as UserFound;
+                if(!docRef.exists()){
+                    throw new Error('Usuário não encontrado.')
+                }
+                setUserFound({...data});
+            }catch(err){
+                navigate("/")
+
+            }
+        }
+        
+        userFound();
+    },[])
+
+    useEffect(()=>{
+        
+        
         const loadLinks = async()=>{
             const linksRef = collection(db, 'links');
-            const queryRef = query(linksRef, orderBy('createdAt', 'asc'));
+            const queryRef = query(linksRef, where('uid', '==', uid));
+
             try{
                 const snapshot = await getDocs(queryRef);
                 const lista = [] as CriarLinkSchema[];
@@ -51,11 +87,11 @@ const Home = ()=>{
     },[])
 
     return (
-        <div className="flex flex-col w-full py-4 items-center justify-center">
-            <h1 className="md:text-4xl text-3xl font-bold text-white mt-20">Anderson Souza</h1>
+        <div style={{background: userFound.background}} className={`flex h-screen flex-col w-full py-4 items-center justify-start`}>
+            <h1 className="md:text-4xl text-3xl font-bold text-white mt-20">{ userFound.name ?? userFound?.username }</h1>
             <span className="text-gray-50 mb-5 mt-3">Veja meus links 👇</span>
 
-            <main className="flex flex-col w-11/12 max-w-xl text-center">
+            <main className="flex  flex-col w-11/12 max-w-xl text-center">
                 {links && links.map(link => (
                     <section style={{background: link.cor_fundo_link}} className="mb-4 w-full py-2 rounded-lg select-none transition-transform hover:scale-105 cursor-pointer">
                         <a style={{color:link.cor_texto_link}} target="_blank" href={`${link.url_link}`}>

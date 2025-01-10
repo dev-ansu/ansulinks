@@ -9,6 +9,7 @@ import {db} from "../../services/firebaseConnection"
 import {addDoc, collection} from "firebase/firestore"
 import { toast } from "react-toastify";
 import LinksList from "../../components/LinksList";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 export type CriarLinkSchema = z.infer<typeof criarLinkSchema>;
 
@@ -18,13 +19,15 @@ const Admin = ()=>{
         criteriaMode:"all",
         resolver: zodResolver(criarLinkSchema)
     });
+    const {user} = useAuthContext();
     const [nameInput, setNameInput] = useState('');
     const [backgroundLinkColor, setBackgroundLinkColor] = useState('#f1f1f1');
     const [textLinkColor, setTextLinkColor] = useState('#000');
 
     const save = async(data:CriarLinkSchema)=>{
+        
         try{
-            await addDoc(collection(db, 'links'), {...data, createdAt: new Date()})        
+            await addDoc(collection(db, 'links'), {...data, uid: user?.uid  , createdAt: new Date()})        
             toast.success("Link criado com sucesso!");
             reset();
         }catch(err){
@@ -34,7 +37,7 @@ const Admin = ()=>{
 
 
     return (
-        <div className="flex  items-center flex-col min-h-screen pb-7 px-2">   
+        <div className="flex items-center flex-col min-h-screen pb-7 px-2">   
             <Header />
 
             <form onSubmit={handleSubmit(save)} className="flex flex-col mt-8 mb-3 w-full max-w-xl">
