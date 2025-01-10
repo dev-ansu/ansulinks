@@ -1,6 +1,6 @@
 import {FiTrash} from "react-icons/fi"
 import { useEffect, useState } from "react";
-import {onSnapshot, doc, collection,deleteDoc, query, orderBy, where} from "firebase/firestore"
+import {onSnapshot, doc, collection,deleteDoc, query, where} from "firebase/firestore"
 import {db} from "../../services/firebaseConnection";
 import { CriarLinkSchema } from "../../pages/admin";
 import { toast } from "react-toastify";
