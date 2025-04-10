@@ -29,7 +29,7 @@ const Profile = ()=>{
         resolver: zodResolver(updateProfileSchema),
     });
 
-    console.log(userFound);
+  
 
     useEffect(()=>{
         const loadUser = async()=>{
@@ -99,10 +99,10 @@ const Profile = ()=>{
 
             <form onSubmit={handleSubmit(save)} className="flex flex-col max-w-xl w-full">
             <p className="border-0 h-9 rounded-md outline-none px-2 mb-3 bg-white flex justify-between items-center w-full">
-            {!hasCopy && <FaRegCopy onClick={() => copyToClipboard(`${import.meta.env.VITE_APPURL}/${user?.uid}`)} className="items-start cursor-pointer text-black" />}
-            {hasCopy && <FaCopy onClick={() => copyToClipboard(`${import.meta.env.VITE_APPURL}/${user?.uid}`)} className="items-start cursor-pointer text-black" />}
+            {!hasCopy && <FaRegCopy onClick={() => copyToClipboard(`${import.meta.env.VITE_APPURL}/${userFound?.username}`)} className="items-start cursor-pointer text-black" />}
+            {hasCopy && <FaCopy onClick={() => copyToClipboard(`${import.meta.env.VITE_APPURL}/${userFound?.username}`)} className="items-start cursor-pointer text-black" />}
             <span className="w-full text-center">
-            {import.meta.env.VITE_APPURL}/{user?.uid}
+            {import.meta.env.VITE_APPURL}/{userFound?.username}
             </span>
             </p>
 

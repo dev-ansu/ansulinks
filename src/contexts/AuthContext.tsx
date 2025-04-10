@@ -43,7 +43,7 @@ export const AuthProvider = ({children}: AuthProviderProps)=>{
         })
         return () => unSub();
     },[])
-
+    
     const handleInfoUser = ({uid,name,email}:UserProps)=>{
         setUser({
             uid,

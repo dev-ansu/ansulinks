@@ -7,7 +7,8 @@ import { CriarLinkSchema } from "../admin";
 import { RedesSociaisProps } from "../networks";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 
-interface UserFound{
+export interface UserFound{
+    uid: string;
     createdAt: Date;
     username: string;
     name: string;
@@ -17,10 +18,10 @@ interface UserFound{
 const Home = ()=>{
     const [links, setLinks] = useState<CriarLinkSchema[]>();
     const [socialLinks, setSocialLinks] = useState<RedesSociaisProps>();
-    const { uid } = useParams();
+    const { username } = useParams();
     const [userFound, setUserFound] = useState({} as UserFound);
     const navigate = useNavigate();
-    if(!uid){
+    if(!username){
         return <Navigate to="/notfound" replace={true} />
     }
 
@@ -28,15 +29,19 @@ const Home = ()=>{
         const userFound = async()=>{
             
             try{
-                const docRef = await getDoc(doc(db, 'usuarios', uid));
-                const data = docRef.data() as UserFound;
-                if(!docRef.exists()){
+                const usuariosRef = collection(db, "usuarios");
+                const q = query(usuariosRef, where("username", "==", username));
+                const querySnapshot = await getDocs(q);
+       
+                if(querySnapshot.empty){
                     throw new Error('Usuário não encontrado.')
                 }
-                setUserFound({...data});
+                
+                const doc = querySnapshot.docs[0];
+                const user = {uid: doc.id, ...doc.data()} as UserFound;
+                setUserFound(user);
             }catch(err){
                 navigate("/")
-
             }
         }
         
@@ -48,7 +53,7 @@ const Home = ()=>{
         
         const loadLinks = async()=>{
             const linksRef = collection(db, 'links');
-            const queryRef = query(linksRef, where('uid', '==', uid));
+            const queryRef = query(linksRef, where('uid', '==', userFound.uid));
 
             try{
                 const snapshot = await getDocs(queryRef);
@@ -67,7 +72,7 @@ const Home = ()=>{
             }
         }
         loadLinks();
-    },[])
+    },[userFound])
 
     useEffect(()=>{
         const loadSocialLinks = ()=>{

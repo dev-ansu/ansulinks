@@ -12,7 +12,7 @@ import Main from "./pages/main";
 
 const router = createBrowserRouter([
   {
-    path:"/:uid",
+    path:"/:username",
     element:<Home />
   },
   {
